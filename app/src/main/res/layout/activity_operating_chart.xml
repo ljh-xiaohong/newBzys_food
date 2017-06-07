@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="true"
+    android:background="#ff9c00">
+    <com.zhy.autolayout.AutoRelativeLayout
+        android:id="@+id/layout_title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="180px"
+        android:background="#ff9c00">
+        <ImageButton
+            android:layout_width="69px"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:onClick="back"
+            android:paddingLeft="30px"
+            android:src="@mipmap/btn_back"
+            android:background="@null"/>
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="经营概况"
+            android:textColor="@android:color/white"
+            android:textSize="51px"
+            android:layout_centerInParent="true"/>
+    </com.zhy.autolayout.AutoRelativeLayout>
+    <WebView
+        android:id="@+id/web"
+        android:layout_below="@id/layout_title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </WebView>
+    <include
+        android:id="@+id/layout_menu"
+        layout="@layout/activity_main_menu"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+
+</com.zhy.autolayout.AutoRelativeLayout>

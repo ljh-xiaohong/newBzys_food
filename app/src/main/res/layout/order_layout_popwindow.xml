@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="810px"
+    android:layout_height="match_parent">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="810px"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dialog_bg"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/btn_handled"
+            android:layout_width="match_parent"
+            android:layout_height="150px"
+            android:background="@null"
+            android:textSize="51px"
+            android:text="已上桌"
+            android:textColor="#333333" />
+        <Button
+            android:id="@+id/btn_removed"
+            android:layout_width="match_parent"
+            android:layout_height="150px"
+            android:background="@null"
+            android:textSize="51px"
+            android:text="已取消"
+            android:textColor="#333333" />
+        <Button
+            android:id="@+id/btn_selled"
+            android:layout_width="match_parent"
+            android:layout_height="150px"
+            android:background="@null"
+            android:textSize="51px"
+            android:text="已售完"
+            android:textColor="#333333" />
+        <Button
+            android:id="@+id/btn_cencel"
+            android:layout_width="match_parent"
+            android:layout_height="150px"
+            android:visibility="gone"
+            android:layout_marginTop="20px"
+            android:background="@null"
+            android:textSize="51px"
+            android:text="取消"
+            android:textColor="#333333" />
+    </com.zhy.autolayout.AutoLinearLayout>
+</com.zhy.autolayout.AutoFrameLayout>

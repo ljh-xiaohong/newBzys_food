@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line_view" />
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="147px"
+        android:background="@color/menu_bg"
+        android:orientation="horizontal" >
+        <!-- 菜品 -->
+        <com.zhy.autolayout.AutoLinearLayout
+            android:id="@+id/layout_menu_food"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:onClick="clickMenu"
+            android:orientation="vertical"
+            android:padding="5dp" >
+            <ImageView
+                android:id="@+id/iv_menu_food"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/food_press"
+                android:contentDescription="@string/app_name" />
+            <TextView
+                android:id="@+id/tv_menu_food"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20px"
+                android:text="菜品销量统计"
+                android:textColor="@color/black6"
+                android:textSize="30px" />
+        </com.zhy.autolayout.AutoLinearLayout>
+        <!-- 桌台 -->
+        <com.zhy.autolayout.AutoLinearLayout
+            android:id="@+id/layout_menu_table"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:onClick="clickMenu"
+            android:orientation="vertical"
+            android:padding="5dp" >
+            <ImageView
+                android:id="@+id/iv_menu_table"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/table_default"
+                android:contentDescription="@string/app_name" />
+            <TextView
+                android:id="@+id/tv_menu_table"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20px"
+                android:text="桌台订单统计"
+                android:textColor="@color/black6"
+                android:textSize="30px" />
+        </com.zhy.autolayout.AutoLinearLayout>
+    </com.zhy.autolayout.AutoLinearLayout>
+</com.zhy.autolayout.AutoLinearLayout>

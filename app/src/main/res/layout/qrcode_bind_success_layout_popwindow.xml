@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="860px"
+    android:background="@drawable/dialog_bg"
+    android:layout_height="wrap_content">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/lay_tips"
+        android:layout_width="860px"
+        android:layout_marginTop="71px"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:textSize="44px"
+            android:textColor="@color/black3"
+            android:text="绑定成功"
+            android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+    <ImageView
+        android:layout_width="679px"
+        android:src="@mipmap/code"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/lay_tips"
+        android:layout_marginBottom="87px"
+        android:layout_marginTop="77px"
+        android:layout_height="679px" />
+</com.zhy.autolayout.AutoRelativeLayout>

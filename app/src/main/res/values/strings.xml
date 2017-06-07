@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">富商美食</string>
+    <string name="menu_home">主页</string>
+    <string name="menu_order">订单</string>
+
+    <string name="permission_tip">请允许权限，保证应用正常运转！</string>
+</resources>

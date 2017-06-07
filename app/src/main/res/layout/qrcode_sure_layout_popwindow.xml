@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="860px"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@drawable/dialog_bg"
+    android:layout_height="wrap_content">
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="wrap_content"
+            android:layout_marginTop="70px"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:textSize="44px"
+                android:textColor="@color/black3"
+                android:text="绑定二维码"
+                android:layout_height="wrap_content" />
+        </com.zhy.autolayout.AutoLinearLayout>
+        <ImageView
+            android:layout_width="679px"
+            android:src="@mipmap/code"
+            android:layout_marginTop="78px"
+            android:layout_height="679px" />
+        <com.zhy.autolayout.AutoRelativeLayout
+            android:layout_width="860px"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="101px"
+            android:layout_marginBottom="107px">
+            <TextView
+                android:id="@+id/btn_cencel"
+                android:layout_width="262px"
+                android:textSize="42px"
+                android:layout_marginStart="108px"
+                android:background="@drawable/btn_gray"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:text="取消"
+                android:layout_height="87px"/>
+            <TextView
+                android:id="@+id/btn_bind"
+                android:layout_width="262px"
+                android:textSize="42px"
+                android:background="@drawable/btn_normal"
+                android:gravity="center"
+                android:layout_marginEnd="108px"
+                android:layout_alignParentEnd="true"
+                android:textColor="@color/white"
+                android:text="绑定"
+                android:layout_height="87px"/>
+        </com.zhy.autolayout.AutoRelativeLayout>
+    </com.zhy.autolayout.AutoLinearLayout>

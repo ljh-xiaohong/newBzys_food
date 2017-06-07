@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:layout_marginTop="32px"
+    android:background="@color/white"
+    android:layout_gravity="center">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/chart_table"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_height="180px">
+       <TextView
+           android:id="@+id/tv_table_name"
+           android:layout_width="wrap_content"
+           android:text="173"
+           android:textColor="@color/black3"
+           android:ellipsize="end"
+           android:maxLines="1"
+           android:layout_marginStart="30px"
+           android:textSize="42px"
+           android:layout_marginEnd="36px"
+           android:layout_height="wrap_content" />
+       <TextView
+           android:id="@+id/tv_table_no"
+           android:layout_width="wrap_content"
+           android:text="173"
+           android:textColor="@color/black6"
+           android:layout_marginStart="30px"
+           android:layout_marginTop="22px"
+           android:textSize="42px"
+           android:layout_marginEnd="36px"
+           android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/chart_order"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_height="180px">
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/menu" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="订单量"
+                android:textColor="@color/black6"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginStart="10px"
+                android:textSize="30px"
+                android:layout_marginEnd="36px"
+                android:layout_height="wrap_content" />
+        </com.zhy.autolayout.AutoLinearLayout>
+
+       <TextView
+           android:id="@+id/tv_order_no"
+           android:layout_width="wrap_content"
+           android:text="173"
+           android:textColor="@color/black3"
+           android:layout_marginStart="30px"
+           android:layout_marginTop="30px"
+           android:textSize="42px"
+           android:layout_marginEnd="36px"
+           android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/chart_watch"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_height="180px">
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/eye" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="浏览量"
+                android:textColor="@color/black6"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginStart="10px"
+                android:textSize="30px"
+                android:layout_marginEnd="36px"
+                android:layout_height="wrap_content" />
+        </com.zhy.autolayout.AutoLinearLayout>
+
+       <TextView
+           android:id="@+id/tv_watch_no"
+           android:layout_width="wrap_content"
+           android:text="173"
+           android:textColor="@color/black3"
+           android:layout_marginStart="30px"
+           android:layout_marginTop="30px"
+           android:textSize="42px"
+           android:layout_marginEnd="36px"
+           android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/chart_money"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_height="180px">
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/money" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="总金额"
+                android:textColor="@color/black6"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginStart="10px"
+                android:textSize="30px"
+                android:layout_marginEnd="36px"
+                android:layout_height="wrap_content" />
+        </com.zhy.autolayout.AutoLinearLayout>
+
+       <TextView
+           android:id="@+id/tv_money_no"
+           android:layout_width="wrap_content"
+           android:text="173"
+           android:textColor="@color/edt_hint_orange"
+           android:layout_marginStart="30px"
+           android:layout_marginTop="30px"
+           android:textSize="42px"
+           android:layout_marginEnd="36px"
+           android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+</com.zhy.autolayout.AutoLinearLayout>
