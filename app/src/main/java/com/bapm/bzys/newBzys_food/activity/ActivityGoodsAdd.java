@@ -26,6 +26,7 @@ import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
 import com.bapm.bzys.newBzys_food.util.GlideUtils;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.ImageUtils;
 import com.qiniu.android.common.Zone;
 import com.qiniu.android.http.ResponseInfo;
@@ -39,6 +40,8 @@ import com.qiniu.android.storage.UploadManager;
 import com.qiniu.android.storage.UploadOptions;
 import com.qiniu.android.storage.persistent.FileRecorder;
 import com.zhy.autolayout.AutoRelativeLayout;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 
 import android.Manifest;
 import android.content.Context;
@@ -69,6 +72,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import okhttp3.Call;
 
 
 public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickListener{
@@ -114,11 +119,12 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 
 	private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 6;
 	private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE2 = 7;
+	private LoginFailUtils failUtils;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setTheme(R.style.ActionSheetStyleIOS7);
+//		setTheme(R.style.ActionSheetStyleIOS7);
 		setContentView(R.layout.activity_goods_add);
 		manager = this.init(this.getContext());
 		manager.registFunClass(ActivityGoodsAdd.class);
@@ -263,6 +269,7 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -320,7 +327,21 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 				} else {
 					iv_opera_img.setVisibility(View.GONE);
 					iv_img.setVisibility(View.VISIBLE);
-					GlideUtils.display(iv_img,goods.getUrl());
+					OkHttpUtils
+							.get()//
+							.url(goods.getUrl())//
+							.build()//
+							.execute(new BitmapCallback()
+							{
+								@Override
+								public void onError(Call call, Exception e, int id) {
+									GlideUtils.displayNative(iv_img, R.mipmap.img_fairl);
+								}
+								@Override
+								public void onResponse(Bitmap response, int id) {
+									iv_img.setImageBitmap(response);
+								}
+							});
 				}
 				if (ed_type.getText().toString().equals("必选商品")) {
 					ed_unit.setText("位");
@@ -355,14 +376,9 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 
 	@Override
 	public void onFaile(int requestCode, int status, String msg) {
-		Log.i(LoginActivity.class.toString(),msg);
-//		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode==HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
 		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityGoodsAdd.this ,manager,ActivityGoodsAdd.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {
@@ -635,7 +651,7 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 	private View popupView;
 	private PopupWindow window;
 	/**
-	 * 动态生成显示items中的textview
+	 * 菜品大类选择器
 	 */
 	private void showToolsView(List<String> types) {
 		LayoutInflater inflater = LayoutInflater.from(this);
@@ -805,101 +821,8 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 				imagePath = mImagePath;
 			}
 			uploadHeader(imagePath);
-//			uploadHeaders(imagePath);
 		}
 	}
-	//	public byte[] Bitmap2Bytes(Bitmap bm) {
-//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//		bm.compress(Bitmap.CompressFormat.PNG, 65, baos);
-//		return baos.toByteArray();
-//	}
-//		File file =new File(Environment.getExternalStorageDirectory(),"Store");
-//	public void uploadHeaders(final String filePath){
-//		//调用压缩图片的方法，返回压缩后的图片path
-////		String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-////		String name = file + File.separator + fileName;
-//		Bitmap bitmap = ImageUtils.getBitmapByPath(filePath);
-//
-//		loadDialog.setTitle("图片上传中...");
-//		loadDialog.show();
-//		Configuration config = new Configuration.Builder()
-//				.chunkSize(256 * 1024)  //分片上传时，每片的大小。 默认256K
-//				.putThreshhold(512 * 1024)  // 启用分片上传阀值。默认512K
-//				.connectTimeout(10) // 链接超时。默认10秒
-//				.responseTimeout(60) // 服务器响应超时。默认60秒
-//				.recorder(null)  // recorder分片上传时，已上传片记录器。默认null
-////                .recorder(recorder keyGen)  // keyGen 分片上传时，生成标识符，用于片记录器区分是那个文件的上传记录
-//				.zone(Zone.zone0) // 设置区域，指定不同区域的上传域名、备用域名、备用IP。
-//				.build();
-//		//重用uploadManager。一般地，只需要创建一个uploadManager对象
-//		UploadManager uploadManager = new UploadManager(config);
-//		String token = DadanPreference.getInstance(this).getQNToken();
-//		if (file.exists()) {
-//			uploadManager.put(Bitmap2Bytes(bitmap), null,token,new UpCompletionHandler() {
-//				@Override
-//				public void complete(String key, ResponseInfo info, JSONObject res) {
-//					loadDialog.dismiss();
-////					compressedPic.deleteOnExit();
-//					//res包含hash、key等信息，具体字段取决于上传策略的设置
-//					if(info.isOK()){
-//						Log.i("qiniu", "Upload Success");
-//						imageKey = res.optString("key");
-////				ImageUtils.cutQualityImage(this, name, bitmap, 65);
-//						//获取图片缩略图，避免OOM
-////		    			Bitmap bitmap = ImageUtils.getImageThumbnail(filePath, ImageUtils.getWidth(ActivityGoodsAdd.this) / 3 - 5, ImageUtils.getWidth(ActivityGoodsAdd.this) / 3 - 5);
-//						String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-//						String name = file + File.separator + fileName;
-//						Bitmap bitmap = ImageUtils.getBitmapByPath(filePath);
-//						try {
-//							ImageUtils.cutQualityImage(ActivityGoodsAdd.this, name, bitmap, 65);
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-//						iv_opera_img.setVisibility(View.GONE);
-//						iv_img.setVisibility(View.VISIBLE);
-//						Glide.with(ActivityGoodsAdd.this).load(filePath).into(iv_img);
-////		    			iv_img.setImageBitmap(bitmap);
-//					}else{
-//						Log.i("qiniu", "Upload Fail");
-//						CustomToast.showToast(ActivityGoodsAdd.this, "图片上传失败");
-//						//如果失败，这里可以把info信息上报自己的服务器，便于后面分析上传错误原因
-//					}
-//					Log.i("qiniu", key + ",\r\n " + info + ",\r\n " + res);
-//				}
-//			} , null);
-//		}else{//直接上传
-//			uploadManager.put(Bitmap2Bytes(bitmap), null,token,new UpCompletionHandler() {
-//				@Override
-//				public void complete(String key, ResponseInfo info, JSONObject res) {
-//					loadDialog.dismiss();
-//					//res包含hash、key等信息，具体字段取决于上传策略的设置
-//					if(info.isOK()){
-//						Log.i("qiniu", "Upload Success");
-//						imageKey = res.optString("key");
-//						//获取图片缩略图，避免OOM
-//						String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-//						String name = file + File.separator + fileName;
-//						Bitmap bitmap = ImageUtils.getBitmapByPath(filePath);
-//						try {
-//							ImageUtils.cutQualityImage(ActivityGoodsAdd.this, name, bitmap, 65);
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-////		    			Bitmap bitmap = ImageUtils.getImageThumbnail(filePath, ImageUtils.getWidth(ActivityGoodsAdd.this) / 3 - 5, ImageUtils.getWidth(ActivityGoodsAdd.this) / 3 - 5);
-//						iv_opera_img.setVisibility(View.GONE);
-//						iv_img.setVisibility(View.VISIBLE);
-//						Glide.with(ActivityGoodsAdd.this).load(filePath).into(iv_img);
-////		    			iv_img.setImageBitmap(bitmap);
-//					}else{
-//						Log.i("qiniu", "Upload Fail");
-//						CustomToast.showToast(ActivityGoodsAdd.this, "图片上传失败");
-//						//如果失败，这里可以把info信息上报自己的服务器，便于后面分析上传错误原因
-//					}
-//					Log.i("qiniu", key + ",\r\n " + info + ",\r\n " + res);
-//				}
-//			} , null);;
-//		}
-//	}
 	private volatile boolean isCancelled = false;
 	public void uploadHeader(final String filePath){
 		//调用压缩图片的方法，返回压缩后的图片path
@@ -930,7 +853,7 @@ public class ActivityGoodsAdd extends BaseActivity implements Function,OnClickLi
 				.responseTimeout(60) // 服务器响应超时。默认60秒
 				.recorder(recorder,keyGen)  // recorder分片上传时，已上传片记录器。默认null
 //                .recorder(recorder keyGen)  // keyGen 分片上传时，生成标识符，用于片记录器区分是那个文件的上传记录
-				.zone(Zone.zone0) // 设置区域，指定不同区域的上传域名、备用域名、备用IP。
+				.zone(Zone.httpsAutoZone) // 设置区域，指定不同区域的上传域名、备用域名、备用IP。
 				.build();
 		//重用uploadManager。一般地，只需要创建一个uploadManager对象
 		UploadManager uploadManager = new UploadManager(config);

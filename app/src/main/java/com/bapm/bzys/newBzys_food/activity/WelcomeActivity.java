@@ -19,7 +19,7 @@ public class WelcomeActivity extends BaseActivity {
 			Intent loginIntent = new Intent(this.getContext(), LoginActivity.class);
 			startActivity(loginIntent);
 //		}else{
-//			Intent loginIntent = new Intent(this.getContext(), MainActivity.class);
+//			Intent loginIntent = new Intent(this.getContext(), ActivityConnectBuleTooth.class);
 //			startActivity(loginIntent);
 //		}
 	}

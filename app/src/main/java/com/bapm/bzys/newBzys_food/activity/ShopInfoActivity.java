@@ -36,6 +36,7 @@ import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.CommonUtil;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.DadanArcDialog;
 import com.bapm.bzys.newBzys_food.widget.wheel.OnWheelChangedListener;
 import com.bapm.bzys.newBzys_food.widget.wheel.WheelView;
@@ -130,6 +131,7 @@ public class ShopInfoActivity extends BaseActivity implements Function, OnWheelC
     protected Map<String, int[]> mDistrictIDs = new HashMap<String, int[]>();
     private View popupView;
     private PopupWindow window;
+    private LoginFailUtils failUtils;
 
 
     @Override
@@ -258,6 +260,7 @@ public class ShopInfoActivity extends BaseActivity implements Function, OnWheelC
                 if (result.optString("LogionCode").equals("1")) {
                     DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
                     initData();
+                    failUtils.getId();
                 } else if (result.optString("LogionCode").equals("-1")) {
                     Intent intent = new Intent(this, LoginActivity.class);
                     intent.putExtra("LogionCode", "-1");
@@ -318,13 +321,9 @@ public class ShopInfoActivity extends BaseActivity implements Function, OnWheelC
     @Override
     public void onFaile(int requestCode, int status, String msg) {
         loadDialog.dismiss();
-        if (requestCode == HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE || requestCode == 233) {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-            manager.loginAgain(params, this);
-        }
+        failUtils=new LoginFailUtils(requestCode,ShopInfoActivity.this ,manager,ShopInfoActivity.this);
+        failUtils.onFaile();
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

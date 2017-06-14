@@ -49,11 +49,11 @@ public class ActivityOperatingChart extends BaseActivity{
             tvTitle.setText("经营概况");
             loadWebUtils = new LoadWebUtils(web, ActivityOperatingChart.this,
 //                    "http://192.168.3.173:34567/Echarts/Index");
-                    "http://fsshdemo.bzys.cn/catering/Echarts/Index");
+                    "http://fsms.hxfsjt.com/Echarts/Index");
         } else {
             tvTitle.setText("浏览报表");
             loadWebUtils = new LoadWebUtils(web, ActivityOperatingChart.this,
-                    "http://fsshdemo.bzys.cn/catering/Echarts/Browse");
+                    "http://fsms.hxfsjt.com/Echarts/Browse");
         }
         loadWebUtils.loadWeb();
     }

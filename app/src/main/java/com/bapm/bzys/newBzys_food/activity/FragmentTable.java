@@ -22,6 +22,7 @@ import com.bapm.bzys.newBzys_food.network.function.interf.Function;
 import com.bapm.bzys.newBzys_food.network.function.interf.FunctionManager;
 import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListViewAdapter;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullViewHolder;
@@ -29,6 +30,7 @@ import com.bapm.bzys.newBzys_food.widget.DadanArcDialog;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;
@@ -70,11 +72,9 @@ public class FragmentTable extends Fragment implements Function {
     private FunctionManager manager;
     private DadanArcDialog loadDialog;
     private Unbinder unbinder;
-    private List<TableSale.WeekDayBean> WeekDayTypes = new ArrayList<TableSale.WeekDayBean>();
-    private List<TableSale.WeekDayBean> MonthDayTypes = new ArrayList<TableSale.WeekDayBean>();
-    private List<TableSale.WeekDayBean> YesTodayTypes = new ArrayList<TableSale.WeekDayBean>();
-    private List<TableSale.WeekDayBean> TodayTypes = new ArrayList<TableSale.WeekDayBean>();
+    private List<TableSale.TableSalesInfoBean> WeekDayTypes = new ArrayList<TableSale.TableSalesInfoBean>();
     private int currentList;
+    private LoginFailUtils failUtils;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,25 +92,29 @@ public class FragmentTable extends Fragment implements Function {
     @Override
     public void onResume() {
         super.onResume();
+        initData("1");
+    }
+    public void initData(String day){
         loadDialog.show();
         Map<String, String> params = new HashMap<String, String>();
+        params.put("selectday",day);
         manager.getTableSaleList(params, this);
     }
     int i = 0;
-    private void initView(final List<TableSale.WeekDayBean> DayTypes) {
+    private void initView(final List<TableSale.TableSalesInfoBean> DayTypes) {
         if (i != 0) {
             zListView.removedCahce();
         }
-        zListView.setAdapter(new NestFullListViewAdapter<TableSale.WeekDayBean.TableSalesInfoBean>(R.layout.fragment_chart_right_table_item, DayTypes.get(currentList).getTableSalesInfo()) {
+        zListView.setAdapter(new NestFullListViewAdapter<TableSale.TableSalesInfoBean>(R.layout.fragment_chart_right_table_item, DayTypes) {
             @Override
-            public void onBind(int pos, TableSale.WeekDayBean.TableSalesInfoBean goodsSales, NestFullViewHolder holder) {
+            public void onBind(int pos, TableSale.TableSalesInfoBean goodsSales, NestFullViewHolder holder) {
                 setOrderData(holder, goodsSales);
                 i = 1;
             }
         });
         loadDialog.dismiss();
     }
-    private void setOrderData(final NestFullViewHolder holder, final TableSale.WeekDayBean.TableSalesInfoBean goodsSales) {
+    private void setOrderData(final NestFullViewHolder holder, final TableSale.TableSalesInfoBean goodsSales) {
         holder.setText(R.id.tv_table_name, goodsSales.getPromotionName());
         holder.setText(R.id.tv_table_no, goodsSales.getPromotionNo() + "");
         holder.setText(R.id.tv_order_no, goodsSales.getOrderCount() + "");
@@ -130,27 +134,22 @@ public class FragmentTable extends Fragment implements Function {
         switch (requstCode) {
             case DadanUrl.GET_TABLE_SALE_LIST_CODE:
                 WeekDayTypes.clear();
-                MonthDayTypes.clear();
-                YesTodayTypes.clear();
-                TodayTypes.clear();
                 Gson gson = new Gson();
                 TableSale tableSale = gson.fromJson(result.toString(), TableSale.class);
-                WeekDayTypes.add(tableSale.getWeekDay());
-                MonthDayTypes.add(tableSale.getMonthDay());
-                YesTodayTypes.add(tableSale.getYesToday());
-                TodayTypes.add(tableSale.getToday());
+                WeekDayTypes.addAll(tableSale.getTableSalesInfo());
                 NumberFormat nf = NumberFormat.getInstance();
                 nf.setGroupingUsed(false);
-                tvOrderCount.setText(nf.format(tableSale.getWeekDay().getOrderTotalCount()) + "");
-                tvSaleMoney.setText(nf.format(tableSale.getWeekDay().getSalesTotalCount())+ "");
-                tvWatchCount.setText(nf.format(tableSale.getWeekDay().getBrowserTotalCount()) + "");
+                tvOrderCount.setText(nf.format(tableSale.getOrderTotalCount()) + "");
+                tvSaleMoney.setText(nf.format(tableSale.getSalesTotalCount())+ "");
+                tvWatchCount.setText(nf.format(tableSale.getBrowserTotalCount()) + "");
 //                showToolsView(TodayTypes);
-                initView(TodayTypes);
+                initView(WeekDayTypes);
                 break;
             case DadanUrl.USER_LOGIN_AGAIN_REQUEST_CODE:
                 if (result.optString("LogionCode").equals("1")) {
                     DadanPreference.getInstance(getActivity()).setTicket(result.optString("Ticket"));
                     onResume();
+                    failUtils.getId();
                 } else if (result.optString("LogionCode").equals("-1")) {
                     Intent intent = new Intent(getContext(), LoginActivity.class);
                     intent.putExtra("LogionCode", "-1");
@@ -158,6 +157,12 @@ public class FragmentTable extends Fragment implements Function {
                     ActivityManager.getInstance().finishAllActivity();
                 }
                 break;
+            case DadanUrl.GET_REGISTRATION_CODE:
+                try {
+                    Log.e("GET_REGISTRATION_CODE",result.getString("Message"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -169,11 +174,8 @@ public class FragmentTable extends Fragment implements Function {
     @Override
     public void onFaile(int requestCode, int status, String msg) {
         loadDialog.dismiss();
-        if (requestCode == HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE || requestCode == 233 || requestCode == 232) {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("DEVICE_ID", ((TelephonyManager) getActivity().getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-            manager.loginAgain(params, this);
-        }
+        failUtils=new LoginFailUtils(requestCode,getActivity(),manager,FragmentTable.this);
+        failUtils.onFaile();
         Log.e("result",msg.toString());
     }
 
@@ -200,7 +202,7 @@ public class FragmentTable extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                initView(TodayTypes);
+                initData("1");
                 break;
             case R.id.tv_yesterday:
                 tvYesterday.setBackgroundResource(R.drawable.tv_date_check);
@@ -211,7 +213,7 @@ public class FragmentTable extends Fragment implements Function {
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                initView(YesTodayTypes);
+                initData("2");
                 break;
             case R.id.tv_week:
                 tvWeek.setBackgroundResource(R.drawable.tv_date_check);
@@ -222,7 +224,7 @@ public class FragmentTable extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                initView(WeekDayTypes);
+                initData("3");
                 break;
             case R.id.tv_month:
                 tvMonth.setBackgroundResource(R.drawable.tv_date_check);
@@ -233,7 +235,7 @@ public class FragmentTable extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
-                initView(MonthDayTypes);
+                initData("4");
                 break;
         }
     }

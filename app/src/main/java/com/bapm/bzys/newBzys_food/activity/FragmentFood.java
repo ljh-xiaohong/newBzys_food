@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import com.bapm.bzys.newBzys_food.R;
+import com.bapm.bzys.newBzys_food.model.AdvertList;
 import com.bapm.bzys.newBzys_food.model.FoodSale;
 import com.bapm.bzys.newBzys_food.model.sort;
 import com.bapm.bzys.newBzys_food.network.DadanUrl;
@@ -23,6 +24,7 @@ import com.bapm.bzys.newBzys_food.network.function.interf.FunctionManager;
 import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListViewAdapter;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullViewHolder;
@@ -30,6 +32,7 @@ import com.bapm.bzys.newBzys_food.widget.DadanArcDialog;
 import com.google.gson.Gson;
 import com.zhy.autolayout.AutoLinearLayout;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -79,14 +82,12 @@ public class FragmentFood extends Fragment implements Function {
     private View view;
     private FunctionManager manager;
     private DadanArcDialog loadDialog;
-    private List<FoodSale.WeekDayBean> WeekDayTypes = new ArrayList<FoodSale.WeekDayBean>();
-    private List<FoodSale.WeekDayBean> MonthDayTypes = new ArrayList<FoodSale.WeekDayBean>();
-    private List<FoodSale.WeekDayBean> YesTodayTypes = new ArrayList<FoodSale.WeekDayBean>();
-    private List<FoodSale.WeekDayBean> TodayTypes = new ArrayList<FoodSale.WeekDayBean>();
+    private List<FoodSale> WeekDayTypes = new ArrayList<FoodSale>();
     private int currentList;
     private boolean isPress = true;
     private int maxSaleCount;
     private int tager;
+    private LoginFailUtils failUtils;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -105,8 +106,12 @@ public class FragmentFood extends Fragment implements Function {
     @Override
     public void onResume() {
         super.onResume();
+        initData("1");
+    }
+    public void initData(String day){
         loadDialog.show();
         Map<String, String> params = new HashMap<String, String>();
+        params.put("selectday",day);
         manager.getFoodSaleList(params, this);
     }
 
@@ -118,27 +123,11 @@ public class FragmentFood extends Fragment implements Function {
     @Override
     public void onSuccess(int requstCode, JSONObject result) {
         switch (requstCode) {
-            case DadanUrl.GET_FOOD_SALE_LIST_CODE:
-                WeekDayTypes.clear();
-                MonthDayTypes.clear();
-                YesTodayTypes.clear();
-                TodayTypes.clear();
-                Gson gson = new Gson();
-                FoodSale foodSale = gson.fromJson(result.toString(), FoodSale.class);
-                WeekDayTypes.addAll(foodSale.getWeekDay());
-                MonthDayTypes.addAll(foodSale.getMonthDay());
-                YesTodayTypes.addAll(foodSale.getYesToday());
-                TodayTypes.addAll(foodSale.getToday());
-                NumberFormat nf = NumberFormat.getInstance();
-                nf.setGroupingUsed(false);
-                tvAllSaleCount.setText(nf.format(foodSale.getWeekDay().get(currentList).getSalesTotalCount()) + "");
-                showToolsView(TodayTypes);
-                initView(TodayTypes);
-                break;
             case DadanUrl.USER_LOGIN_AGAIN_REQUEST_CODE:
                 if (result.optString("LogionCode").equals("1")) {
                     DadanPreference.getInstance(getActivity()).setTicket(result.optString("Ticket"));
                     onResume();
+                    failUtils.getId();
                 } else if (result.optString("LogionCode").equals("-1")) {
                     Intent intent = new Intent(getContext(), LoginActivity.class);
                     intent.putExtra("LogionCode", "-1");
@@ -146,12 +135,18 @@ public class FragmentFood extends Fragment implements Function {
                     ActivityManager.getInstance().finishAllActivity();
                 }
                 break;
+            case DadanUrl.GET_REGISTRATION_CODE:
+                try {
+                    Log.e("GET_REGISTRATION_CODE",result.getString("Message"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
     int i = 0;
     //加载报表
-    private void initView(final List<FoodSale.WeekDayBean>DayTypes) {
+    private void initView(final List<FoodSale>DayTypes) {
 //        setSrollView();
 //        setRefresh();
 //        delectTips.setOnClickListener(this);
@@ -164,6 +159,9 @@ public class FragmentFood extends Fragment implements Function {
         if (i != 0) {
             zListView.removedCahce();
         }
+        if ( DayTypes.get(currentList).getGoodsSales().size()==0){
+            return;
+        }
         //判断报表排序方式
         if (isPress) {
             imgUpanddown.setImageResource(R.mipmap.upanddown_default);
@@ -174,9 +172,9 @@ public class FragmentFood extends Fragment implements Function {
             Collections.sort(DayTypes.get(currentList).getGoodsSales(), new sort("asc"));
             maxSaleCount = DayTypes.get(currentList).getGoodsSales().get(DayTypes.get(currentList).getGoodsSales().size()-1).getSaleCount();
         }
-        zListView.setAdapter(new NestFullListViewAdapter<FoodSale.WeekDayBean.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
+        zListView.setAdapter(new NestFullListViewAdapter<FoodSale.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
             @Override
-            public void onBind(int pos, FoodSale.WeekDayBean.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
+            public void onBind(int pos, FoodSale.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
                 setOrderData(holder, goodsSales);
                 i = 1;
             }
@@ -192,9 +190,9 @@ public class FragmentFood extends Fragment implements Function {
                         zListView.removedCahce();
                     }
                     Collections.sort(DayTypes.get(currentList).getGoodsSales(), new sort("asc"));
-                    zListView.setAdapter(new NestFullListViewAdapter<FoodSale.WeekDayBean.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
+                    zListView.setAdapter(new NestFullListViewAdapter<FoodSale.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
                         @Override
-                        public void onBind(int pos, FoodSale.WeekDayBean.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
+                        public void onBind(int pos, FoodSale.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
                             setOrderData(holder, goodsSales);
                             i = 1;
                         }
@@ -206,9 +204,9 @@ public class FragmentFood extends Fragment implements Function {
                         zListView.removedCahce();
                     }
                     Collections.sort(DayTypes.get(currentList).getGoodsSales(), new sort("desc"));
-                    zListView.setAdapter(new NestFullListViewAdapter<FoodSale.WeekDayBean.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
+                    zListView.setAdapter(new NestFullListViewAdapter<FoodSale.GoodsSalesBean>(R.layout.fragment_chart_right_food_item, DayTypes.get(currentList).getGoodsSales()) {
                         @Override
-                        public void onBind(int pos, FoodSale.WeekDayBean.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
+                        public void onBind(int pos, FoodSale.GoodsSalesBean goodsSales, NestFullViewHolder holder) {
                             setOrderData(holder, goodsSales);
                             i = 1;
                         }
@@ -220,7 +218,7 @@ public class FragmentFood extends Fragment implements Function {
         loadDialog.dismiss();
     }
     //菜品加载
-    private void setOrderData(final NestFullViewHolder holder, final FoodSale.WeekDayBean.GoodsSalesBean goodsSales) {
+    private void setOrderData(final NestFullViewHolder holder, final FoodSale.GoodsSalesBean goodsSales) {
         //根据数据改变进度条
         DisplayMetrics displayMetrics =getActivity().getResources().getDisplayMetrics();
         int rightWidth =(int)(holder.getView(R.id.chart_long).getLayoutParams().width*displayMetrics.density/3.5);
@@ -263,7 +261,7 @@ public class FragmentFood extends Fragment implements Function {
     /**
      * 动态生成显示items中的textview
      */
-    private void showToolsView(List<FoodSale.WeekDayBean> WeekDayTypes) {
+    private void showToolsView(List<FoodSale> WeekDayTypes) {
         inflater = LayoutInflater.from(getActivity());
         int size = tools.getChildCount();
         for (int i = 0; i < size; i++) {
@@ -312,23 +310,43 @@ public class FragmentFood extends Fragment implements Function {
             int tag = (Integer) v.getTag();
             currentList = tag;
             changeTextColor(tag);
-            if (tager==0){
-                initView(TodayTypes);
-            }else if(tager==1){
-                initView(YesTodayTypes);
-            }else if(tager==2){
+//            if (tager==0){
                 initView(WeekDayTypes);
-            }else if(tager==3){
-                initView(MonthDayTypes);
-            }
+//            }else if(tager==1){
+//                initView(WeekDayTypes);
+//            }else if(tager==2){
+//                initView(WeekDayTypes);
+//            }else if(tager==3){
+//                initView(WeekDayTypes);
+//            }
         }
     };
-
+    private FoodSale foodSale;
     @Override
     public void onSuccess(int requstCode, JSONArray result) {
-        Log.e("result", result + "");
+        Gson gson = new Gson();
         switch (requstCode) {
             case DadanUrl.GET_FOOD_SALE_LIST_CODE:
+                WeekDayTypes.clear();
+                for (int i = 0; i < result.length(); i++) {
+                    try {
+                        JSONObject  adverListJson  = result.getJSONObject(i);
+                        foodSale = gson.fromJson(adverListJson.toString(), FoodSale.class);
+                        WeekDayTypes.add(foodSale);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (WeekDayTypes.size()!=0) {
+                    NumberFormat nf = NumberFormat.getInstance();
+                    nf.setGroupingUsed(false);
+                    tvAllSaleCount.setText(nf.format(foodSale.getSalesTotalCount()) + "");
+                    showToolsView(WeekDayTypes);
+                    initView(WeekDayTypes);
+                }else{
+                    CustomToast.showToast(getActivity(),"目前还没有销量报表");
+                }
                 break;
 
         }
@@ -337,11 +355,8 @@ public class FragmentFood extends Fragment implements Function {
     @Override
     public void onFaile(int requestCode, int status, String msg) {
         loadDialog.dismiss();
-        if (requestCode == HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE || requestCode == 233 || requestCode == 232) {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("DEVICE_ID", ((TelephonyManager) getActivity().getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-            manager.loginAgain(params, this);
-        }
+        failUtils=new LoginFailUtils(requestCode,getActivity(),manager,FragmentFood.this);
+        failUtils.onFaile();
         if(requestCode==245){
             CustomToast.showToast(getActivity(),"网络请求超时");
         }
@@ -373,8 +388,9 @@ public class FragmentFood extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                showToolsView(TodayTypes);
-                initView(TodayTypes);
+//                showToolsView(TodayTypes);
+//                initView(TodayTypes);
+                initData("1");
                 break;
             case R.id.tv_yesterday:
                 tager=1;
@@ -386,8 +402,9 @@ public class FragmentFood extends Fragment implements Function {
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                showToolsView(YesTodayTypes);
-                initView(YesTodayTypes);
+//                showToolsView(YesTodayTypes);
+//                initView(YesTodayTypes);
+                initData("2");
                 break;
             case R.id.tv_week:
                 tager=2;
@@ -399,8 +416,9 @@ public class FragmentFood extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvMonth.setTextColor(getResources().getColor(R.color.tv_date));
-                showToolsView(WeekDayTypes);
-                initView(WeekDayTypes);
+//                showToolsView(WeekDayTypes);
+//                initView(WeekDayTypes);
+                initData("3");
                 break;
             case R.id.tv_month:
                 tager=3;
@@ -412,8 +430,9 @@ public class FragmentFood extends Fragment implements Function {
                 tvYesterday.setTextColor(getResources().getColor(R.color.tv_date));
                 tvWeek.setTextColor(getResources().getColor(R.color.tv_date));
                 tvToday.setTextColor(getResources().getColor(R.color.tv_date));
-                showToolsView(MonthDayTypes);
-                initView(MonthDayTypes);
+//                showToolsView(MonthDayTypes);
+//                initView(MonthDayTypes);
+                initData("4");
                 break;
         }
     }

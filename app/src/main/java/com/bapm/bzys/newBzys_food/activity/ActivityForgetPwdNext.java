@@ -15,6 +15,7 @@ import com.bapm.bzys.newBzys_food.util.CommonUtil;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialogListener;
 
@@ -34,6 +35,8 @@ public class ActivityForgetPwdNext extends BaseActivity implements Function{
 	private EditText ed_new_pwd;
 	private EditText ed_again_pwd;
 	private String phone;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,6 +77,7 @@ public class ActivityForgetPwdNext extends BaseActivity implements Function{
 			case DadanUrl.USER_LOGIN_AGAIN_REQUEST_CODE:
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -114,12 +118,8 @@ public class ActivityForgetPwdNext extends BaseActivity implements Function{
 	public void onFaile(int requestCode, int status, String msg) {
 		loadDialog.dismiss();
 		Log.i(ActivityForgetPwdNext.class.toString(),msg);
-//		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode== HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		failUtils=new LoginFailUtils(requestCode,ActivityForgetPwdNext.this ,manager,ActivityForgetPwdNext.this);
+		failUtils.onFaile();
 	}
 	@Override
 	protected void onDestroy() {

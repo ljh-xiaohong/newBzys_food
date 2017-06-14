@@ -1,9 +1,11 @@
 package com.bapm.bzys.newBzys_food.activity;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -11,6 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.telephony.TelephonyManager;
@@ -33,6 +36,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bapm.bzys.newBzys_food.R;
+import com.bapm.bzys.newBzys_food.base.UseDeviceSizeApplication;
+import com.bapm.bzys.newBzys_food.buletooth.PrintUtils;
+import com.bapm.bzys.newBzys_food.buletooth.contants.BltContant;
+import com.bapm.bzys.newBzys_food.buletooth.manager.BltManager;
 import com.bapm.bzys.newBzys_food.model.AdvertList;
 import com.bapm.bzys.newBzys_food.model.Order;
 import com.bapm.bzys.newBzys_food.network.DadanUrl;
@@ -43,6 +50,7 @@ import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
 import com.bapm.bzys.newBzys_food.util.GlideUtils;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListViewAdapter;
 import com.bapm.bzys.newBzys_food.view.nestlistview.NestFullViewHolder;
@@ -51,11 +59,14 @@ import com.bapm.bzys.newBzys_food.widget.dialog.TipsDialog;
 import com.google.gson.Gson;
 import com.zhy.autolayout.AutoLinearLayout;
 import com.zhy.autolayout.AutoRelativeLayout;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +76,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import okhttp3.Call;
 
 import static android.content.Context.TELEPHONY_SERVICE;
 
@@ -116,8 +128,68 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
     private int currentList = 0;
     int i = 0;
     private String orderId;
-    private boolean isUpdate = false;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 2:
+                    CustomToast.showToast(getActivity(), "连接失败");
+                    break;
+                case 4://连接成功
+                    try {
+                        PrintUtils.setOutputStream(UseDeviceSizeApplication.bluetoothSocket.getOutputStream());
+                        if (PrintUtils.getOutputStream()==null){
+                        Toast.makeText(getActivity(),"请先连接打印机",Toast.LENGTH_LONG).show();
+                    }else{
+                        print();
+                    }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+        }
+    };
+    private LoginFailUtils failUtils;
 
+    private void print() {
+//        BluePrint.getInstance().print();
+        PrintUtils.selectCommand(PrintUtils.RESET);
+        PrintUtils.selectCommand(PrintUtils.LINE_SPACING_DEFAULT);
+        PrintUtils.selectCommand(PrintUtils.ALIGN_CENTER);
+        PrintUtils.printText("美食餐厅\n\n");
+//        PrintUtils.selectCommand(PrintUtils.DOUBLE_HEIGHT_WIDTH);
+//        PrintUtils.printText("桌号：1号桌\n\n");
+//        PrintUtils.selectCommand(PrintUtils.NORMAL);
+//        PrintUtils.selectCommand(PrintUtils.ALIGN_LEFT);
+//        PrintUtils.printText(PrintUtils.printTwoData("订单编号", "201507161515\n"));
+//        PrintUtils.printText(PrintUtils.printTwoData("点菜时间", "2016-02-16 10:46\n"));
+//        PrintUtils.printText(PrintUtils.printTwoData("上菜时间", "2016-02-16 11:46\n"));
+//        PrintUtils.printText(PrintUtils.printTwoData("人数：2人", "收银员：张三\n"));
+//
+//        PrintUtils.printText("--------------------------------\n");
+//        PrintUtils.selectCommand(PrintUtils.BOLD);
+//        PrintUtils.printText(PrintUtils.printThreeData("项目", "数量", "金额\n"));
+//        PrintUtils.printText("--------------------------------\n");
+//        PrintUtils.selectCommand(PrintUtils.BOLD_CANCEL);
+//        PrintUtils.printText(PrintUtils.printThreeData("面", "1", "0.00\n"));
+//        PrintUtils.printText(PrintUtils.printThreeData("米饭", "1", "6.00\n"));
+//        PrintUtils.printText(PrintUtils.printThreeData("铁板烧", "1", "26.00\n"));
+//        PrintUtils.printText(PrintUtils.printThreeData("一个测试", "1", "226.00\n"));
+//        PrintUtils.printText(PrintUtils.printThreeData("牛肉面啊啊", "1", "2226.00\n"));
+//        PrintUtils.printText(PrintUtils.printThreeData("牛肉面啊啊啊牛肉面啊啊啊", "888", "98886.00\n"));
+//
+//        PrintUtils.printText("--------------------------------\n");
+//        PrintUtils.printText(PrintUtils.printTwoData("合计", "53.50\n"));
+//        PrintUtils.printText(PrintUtils.printTwoData("抹零", "3.50\n"));
+//        PrintUtils.printText("--------------------------------\n");
+//        PrintUtils.printText(PrintUtils.printTwoData("应收", "50.00\n"));
+//        PrintUtils.printText("--------------------------------\n");
+//
+//        PrintUtils.selectCommand(PrintUtils.ALIGN_LEFT);
+//        PrintUtils.printText("备注：不要辣、不要香菜");
+//        PrintUtils.printText("\n\n\n\n\n");
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -143,7 +215,6 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
     }
 
     private void initData(Map<String, String> params) {
-        isUpdate = true;
         loadDialog.show();
         manager.getOrderList(params, this);
     }
@@ -547,6 +618,13 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
                                     dialog.dismiss();
                                     loadDialog.show();
                                     manager.OrderReceipt(params, FragmentOrder.this);
+//                                    Log.e("address",DadanPreference.getInstance(getActivity()).getString("address"));
+//                                    if (DadanPreference.getInstance(getActivity()).getString("address")!=null&&!DadanPreference.getInstance(getActivity()).getString("address").equals("")) {
+//                                        BltManager.getInstance().initBltManager(getActivity());
+//                                        BltManager.getInstance().autoConnect(DadanPreference.getInstance(getActivity()).getString("address"), handler);
+//                                    }else {
+//                                        CustomToast.showToast(getActivity(),"没有连接蓝牙打印机,无法打印");
+//                                    }
                                 }
                             }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                         @Override
@@ -576,7 +654,6 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
                         final JSONObject params = new JSONObject();
                         try {
                             dialogs.dismiss();
-                            loadDialog.show();
                             params.put("orderId", order.getID());
                             params.put("statusId","12");
                             LayoutInflater inflater = (LayoutInflater) getActivity()
@@ -629,7 +706,21 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
         if (cofdsBean.getHeadimgurl() == null || cofdsBean.getHeadimgurl().equals("")) {
             GlideUtils.displayNative((ImageView) holder.getView(R.id.img_head), R.mipmap.qrcode_default);
         } else {
-            GlideUtils.display((ImageView) holder.getView(R.id.img_head), cofdsBean.getHeadimgurl());
+            OkHttpUtils
+                    .get()//
+                    .url(cofdsBean.getHeadimgurl())//
+                    .build()//
+                    .execute(new BitmapCallback()
+                    {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+                            GlideUtils.displayNative((ImageView) holder.getView(R.id.img_head), R.mipmap.img_fairl);
+                        }
+                        @Override
+                        public void onResponse(Bitmap response, int id) {
+                            ((ImageView) holder.getView(R.id.img_head)).setImageBitmap(response);
+                        }
+                    });
         }
         ((NestFullListView) holder.getView(R.id.zListView)).setAdapter(new NestFullListViewAdapter<Order.CofdsBean.OrderDetailsBean>(R.layout.fragment_order_list_item, cofdsBean.getOrderDetails()) {
             @Override
@@ -642,7 +733,7 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
         }
     }
     //必选商品层
-    private void setRequieredGoodsData(String orderFormStatus, NestFullViewHolder holder, Order.RequieredGoodsBean cofdsBean) {
+    private void setRequieredGoodsData(String orderFormStatus, final NestFullViewHolder holder, Order.RequieredGoodsBean cofdsBean) {
         holder.setText(R.id.tv_order_list_name, cofdsBean.getGoodsName());
         holder.setText(R.id.tv_order_list_id, "编号：" + cofdsBean.getGoodsNo());
         NumberFormat nf = NumberFormat.getInstance();
@@ -658,7 +749,21 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
         if (cofdsBean.getPicThum() == null || cofdsBean.getPicThum().equals("")) {
             GlideUtils.displayNative((ImageView) holder.getView(R.id.img_order_list), R.mipmap.qrcode_default);
         } else {
-            GlideUtils.display((ImageView) holder.getView(R.id.img_order_list), cofdsBean.getPicThum());
+            OkHttpUtils
+                    .get()//
+                    .url(cofdsBean.getPicThum())//
+                    .build()//
+                    .execute(new BitmapCallback()
+                    {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+                            GlideUtils.displayNative((ImageView) holder.getView(R.id.img_order_list), R.mipmap.img_fairl);
+                        }
+                        @Override
+                        public void onResponse(Bitmap response, int id) {
+                            ((ImageView) holder.getView(R.id.img_order_list)).setImageBitmap(response);
+                        }
+                    });
         }
         if(orderFormStatus.equals("12")){
             holder.setTextColor(R.id.tv_order_list_name,R.color.black9);
@@ -713,7 +818,21 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
         if (cofdsBean.getPicThum() == null || cofdsBean.getPicThum().equals("")) {
             GlideUtils.displayNative((ImageView) holder.getView(R.id.img_order_list), R.mipmap.qrcode_default);
         } else {
-            GlideUtils.display((ImageView) holder.getView(R.id.img_order_list), cofdsBean.getPicThum());
+            OkHttpUtils
+                    .get()//
+                    .url(cofdsBean.getPicThum())//
+                    .build()//
+                    .execute(new BitmapCallback()
+                    {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+                            GlideUtils.displayNative((ImageView) holder.getView(R.id.img_order_list), R.mipmap.img_fairl);
+                        }
+                        @Override
+                        public void onResponse(Bitmap response, int id) {
+                            ((ImageView) holder.getView(R.id.img_order_list)).setImageBitmap(response);
+                        }
+                    });
         }
         if(pos.equals("12")){
             holder.setTextColor(R.id.tv_order_list_name,R.color.black9);
@@ -996,6 +1115,7 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
                 if (result.optString("LogionCode").equals("1")) {
                     DadanPreference.getInstance(getActivity()).setTicket(result.optString("Ticket"));
                     onResume();
+                    failUtils.getId();
                 } else if (result.optString("LogionCode").equals("-1")) {
                     Intent intent = new Intent(getContext(), LoginActivity.class);
                     intent.putExtra("LogionCode", "-1");
@@ -1024,20 +1144,21 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
                 CustomToast.showToast(getActivity(), result.optString("Message"));
                 break;
             case DadanUrl.CHANGE_ORDER_NUMBER_CODE:
-                if (!isUpdate) {
                     params.put("intPromotionID", types.get(currentList).getID() + "");
                     initData(params);
                     CustomToast.showToast(getActivity(), result.optString("Message"));
-                    Log.e("if", "" + isUpdate);
-                } else {
-                    Log.e("else", "" + isUpdate);
-                }
                 break;
             case DadanUrl.CHANGE_TABLE_NUMBER_CODE:
                 params.put("intPromotionID", types.get(currentList).getID() + "");
                 initData(params);
                 CustomToast.showToast(getActivity(), result.optString("Message"));
                 break;
+            case DadanUrl.GET_REGISTRATION_CODE:
+                try {
+                    Log.e("GET_REGISTRATION_CODE",result.getString("Message"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             default:
                 break;
         }
@@ -1136,11 +1257,8 @@ public class FragmentOrder extends Fragment implements Function, View.OnClickLis
     @Override
     public void onFaile(int requestCode, int status, String msg) {
         loadDialog.dismiss();
-        if (requestCode == HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE || requestCode == 233 || requestCode == 232) {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("DEVICE_ID", ((TelephonyManager) getActivity().getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-            manager.loginAgain(params, this);
-        }
+        failUtils=new LoginFailUtils(requestCode,getActivity(),manager,this);
+        failUtils.onFaile();
 //        CustomToast.showToast(getActivity(), requestCode+"网络错误");
     }
 

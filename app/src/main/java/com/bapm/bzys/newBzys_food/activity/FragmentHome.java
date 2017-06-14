@@ -17,6 +17,7 @@ import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialogListener;
 
@@ -49,7 +50,10 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 	private RelativeLayout layout_chart;//报表统计
 	private RelativeLayout layout_client_profile;//基本资料
 	private RelativeLayout layout_book_information;//帮助与反馈
+	private RelativeLayout layout_buletooth;//帮助与反馈
 	private ImageView btn_exit;
+	private LoginFailUtils failUtils;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 		if (view == null) {// 优化View减少View的创建次数
@@ -80,6 +84,7 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 		layout_chart   = (RelativeLayout) view.findViewById(R.id.layout_chart);
 		layout_client_profile = (RelativeLayout) view.findViewById(R.id.layout_client_profile);
 		layout_book_information = (RelativeLayout) view.findViewById(R.id.layout_book_information);
+		layout_buletooth = (RelativeLayout) view.findViewById(R.id.layout_buletooth);
 		btn_exit = (ImageView) view.findViewById(R.id.btn_exit);
 		layout_sitemap.setOnClickListener(this);
 		layout_archive.setOnClickListener(this);
@@ -88,6 +93,7 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 		layout_chart.setOnClickListener(this);
 		layout_client_profile.setOnClickListener(this);
 		layout_book_information.setOnClickListener(this);
+		layout_buletooth.setOnClickListener(this);
 		btn_exit.setOnClickListener(this);
 	}
 	@Override
@@ -129,6 +135,11 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 			startActivity(child);
 			break;
 			}
+		case R.id.layout_buletooth:{
+			Intent child = new Intent(this.getActivity(),ActivityConnectBuleTooth.class);
+			startActivity(child);
+			break;
+			}
 		case R.id.btn_exit:{
 			new MyDialog(this.getContext()).callback(MyDialog.TYPE_INFO, "您确定要退出吗？",
 					new MyDialogListener() {
@@ -166,6 +177,7 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(getActivity()).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(getContext(),LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -196,7 +208,7 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 				DadanPreference.getInstance(getActivity()).setString("StoreMessage",result.toString());
 				CustomToast.showToast(getActivity(),storeName);
 			}else{
-				 CustomToast.showToast(getActivity(),"请先填写店铺资料！！！");
+				CustomToast.showToast(getActivity(),"请先填写店铺资料！！！");
 				Intent intent=new Intent(this.getActivity(),ShopInfoActivity.class);
 				intent.putExtra("wherefrom","RegistActivity");
 				startActivity(intent);
@@ -204,6 +216,12 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 			}
 			break;
 		}
+			case DadanUrl.GET_REGISTRATION_CODE:
+				try {
+					Log.e("GET_REGISTRATION_CODE",result.getString("Message"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 		default:
 			break;
 		}
@@ -214,14 +232,7 @@ public class FragmentHome extends Fragment implements OnClickListener,Function{
 	}
 	@Override
 	public void onFaile(int requestCode, int status, String msg) {
-		Log.e("requestCode",requestCode+"");
-		Log.e("status",status+"");
-		Log.e("msg",msg+"");
-		CustomToast.showToast(getActivity(),msg);
-		if(requestCode== HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getActivity().getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		failUtils=new LoginFailUtils(requestCode,getActivity(),manager,FragmentHome.this);
+		failUtils.onFaile();
 	}
 }

@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
     <com.zhy.autolayout.AutoLinearLayout 
         android:layout_width="fill_parent"
+        android:background="@color/white"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <ImageView
@@ -15,27 +16,28 @@
         <com.zhy.autolayout.AutoLinearLayout 
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
         <TextView
             android:id="@+id/tv_type_number"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="20px"
             android:paddingTop="20px"
             android:textColor="@color/black3"
             android:textSize="36px"
-            android:gravity="center"/>
+           />
         <TextView
             android:id="@+id/tv_type_name"
-            android:layout_width="fill_parent"
+            android:layout_width="178px"
             android:layout_height="wrap_content"
             android:paddingBottom="20px"
             android:paddingTop="20px"
+            android:gravity="center_horizontal"
+            android:maxLines="1"
             android:textColor="@color/black3"
-            android:maxEms="10"
-            android:ellipsize="end"
             android:textSize="36px"
-            android:gravity="center"/>
+            />
             </com.zhy.autolayout.AutoLinearLayout >
     </com.zhy.autolayout.AutoLinearLayout >
     <ImageView

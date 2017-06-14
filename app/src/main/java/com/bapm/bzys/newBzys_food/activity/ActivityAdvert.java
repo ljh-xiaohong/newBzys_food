@@ -27,10 +27,14 @@ import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
 import com.bapm.bzys.newBzys_food.util.FileUtils;
 import com.bapm.bzys.newBzys_food.util.GlideUtils;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
 import com.bapm.bzys.newBzys_food.widget.dialog.TipsDialog;
 import com.bapm.bzys.newBzys_food.zxing.activity.CaptureActivity;
 import com.google.gson.Gson;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -69,6 +73,7 @@ import cn.sharesdk.tencent.qq.QQ;
 import cn.sharesdk.tencent.qzone.QZone;
 import cn.sharesdk.wechat.friends.Wechat;
 import cn.sharesdk.wechat.moments.WechatMoments;
+import okhttp3.Call;
 
 public class ActivityAdvert extends BaseActivity implements Function,OnClickListener,ZrcListView.OnItemClickListener {
 	private FunctionManager manager;
@@ -77,6 +82,7 @@ public class ActivityAdvert extends BaseActivity implements Function,OnClickList
 	private AdvertAdapter adapter;
 	private List<Advert> list;
 	private LinearLayout   layout_menu_home;
+	private LoginFailUtils failUtils;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +192,7 @@ public class ActivityAdvert extends BaseActivity implements Function,OnClickList
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -209,11 +216,9 @@ public class ActivityAdvert extends BaseActivity implements Function,OnClickList
 		listView.setRefreshFail("加载失败");
 		listView.stopLoadMore();
 //		检测ticket过期和账号被别的设备挤掉
-		if(requestCode==HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityAdvert.this ,manager,ActivityAdvert.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {
@@ -485,7 +490,21 @@ public class ActivityAdvert extends BaseActivity implements Function,OnClickList
 		if (list.get(index).getUrl()==null||list.get(index).getUrl().equals("")) {
 			GlideUtils.displayNative(img_desk, R.mipmap.qrcode_default);
 		} else {
-			GlideUtils.display(img_desk,list.get(index).getUrl());
+			OkHttpUtils
+					.get()//
+					.url(list.get(index).getUrl())//
+					.build()//
+					.execute(new BitmapCallback()
+					{
+						@Override
+						public void onError(Call call, Exception e, int id) {
+							GlideUtils.displayNative(img_desk, R.mipmap.img_fairl);
+						}
+						@Override
+						public void onResponse(Bitmap response, int id) {
+							img_desk.setImageBitmap(response);
+						}
+					});
 		}
 		TextView tv_name= (TextView) popupView.findViewById(R.id.tv_name);
 		Gson gson = new Gson();
@@ -496,9 +515,9 @@ public class ActivityAdvert extends BaseActivity implements Function,OnClickList
 		TextView tv_phone= (TextView) popupView.findViewById(R.id.tv_phone);
 		tv_phone.setText("电话："+storeMessage.getTelePhone());
 		TextView tv_desk_name= (TextView) popupView.findViewById(R.id.tv_desk_name);
-		tv_desk_name.setText(list.get(index).getName());
-		TextView tv_desk_no= (TextView) popupView.findViewById(R.id.tv_desk_no);
-		tv_desk_no.setText(list.get(index).getNo());
+		tv_desk_name.setText(list.get(index).getName()+"		"+list.get(index).getNo());
+//		TextView tv_desk_no= (TextView) popupView.findViewById(R.id.tv_desk_no);
+//		tv_desk_no.setText(list.get(index).getNo());
 		share_bitmap=img_desk.getDrawingCache();
 	}
 	//分享操作

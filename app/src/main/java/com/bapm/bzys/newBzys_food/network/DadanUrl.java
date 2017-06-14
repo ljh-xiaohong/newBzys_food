@@ -51,14 +51,11 @@ public class DadanUrl {
     public static final int GET_FOOD_SALE_LIST_CODE    = 245;
     public static final int GET_TABLE_SALE_LIST_CODE    = 246;
 
-//        public static final String BASE_ONE_URL="http://mapi.bzys.cn/api/";
-//      public static final String BASE_ONE_URL="https://dev.bzys.cn:1442/api/";
+    //开发环境
       public static final String BASE_ONE_URL="http://192.168.3.105:8896/api/";
+    //正式环境
+//      public static final String BASE_ONE_URL="https://fsmsapi.hxfsjt.com:4430/api/";
 //      public static final String BASE_ONE_URL="http://192.168.3.171:8070/api/";
-//    public static final String BASE_ONE_URL="http://192.168.3.105:8989/gallery/api/";
-//    public static final String BASE_ONE_URL="http://192.168.3.105:8897/api/";
-
-//public static final String BASE_ONE_URL="http://192.168.3.19:8989/CateringAPI/api/";
     //    public static final String BASE_ONE_URL="https://at.bzys.cn:8443/api/";
 	 //七牛上传凭证
     public static final String OPEN_API_QI_NIU_TOKEN_URL 

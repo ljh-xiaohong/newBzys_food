@@ -86,14 +86,13 @@ public class GlideUtils {
             int width = (int) (display.getWidth() * 0.50);
             Glide.with(context)
                     .load(url)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .error(R.mipmap.img_fairl)
                     .placeholder(defaultImage)
                     .crossFade()
                     .override(width, width)
                     .centerCrop()
-//                    .fitCenter()
-                    //.transform(new ScaleTransform(context))
+                    .fitCenter()
                     .into(view)
                     .getSize(new SizeReadyCallback() {
                                  @Override

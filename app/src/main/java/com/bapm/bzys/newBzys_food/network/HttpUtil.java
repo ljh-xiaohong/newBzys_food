@@ -1,8 +1,10 @@
 package com.bapm.bzys.newBzys_food.network;
+import android.content.Context;
 import android.util.Log;
 
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
 import com.bapm.bzys.newBzys_food.util.JsonValidator;
+import com.bumptech.glide.module.GlideModule;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,9 +16,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +30,13 @@ import java.util.Map.Entry;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpStatus;
@@ -95,38 +104,171 @@ public class HttpUtil {
         }
         return http;
     }
-
+	private static final String[] CERTIFICATES = new String[]{"fsmsAPI.hxfsjt.com.cer"};
     /**
      * 初始化https请求参数
      */
-    private static HttpsURLConnection initHttps(String url, String method, Map<String, String> headers)throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
-        TrustManager[] tm = {new MyX509TrustManager()};
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, tm, new java.security.SecureRandom());
-        // 从上述SSLContext对象中得到SSLSocketFactory对象  
-        SSLSocketFactory ssf = sslContext.getSocketFactory();
+    private static HttpsURLConnection initHttps(String url, String method, Map<String, String> headers, Context context)throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
+
+//		TrustManager[] tm = {new MyX509TrustManager()};
+//        SSLContext sslContext = SSLContext.getInstance("SSL");
+//        sslContext.init(null, tm, new java.security.SecureRandom());
+//        // 从上述SSLContext对象中得到SSLSocketFactory对象
+//        SSLSocketFactory ssf = sslContext.getSocketFactory();
         URL _url = new URL(url);
         HttpsURLConnection https = (HttpsURLConnection) _url.openConnection();
         // 设置域名校验
-        https.setHostnameVerifier(new TrustAnyHostnameVerifier());
-        https.setSSLSocketFactory(ssf);
+		InputStream[] certificates = getCertificates(context, CERTIFICATES);
+		SSLSocketFactory sslSocketFactory = getSSLSocketFactory(certificates, null, null);
+		https.setDefaultSSLSocketFactory(sslSocketFactory);
+		if (certificates == null) {
+			https.setDefaultHostnameVerifier(getUnSafeHostnameVerifier());
+		}
         // 连接超时
         https.setConnectTimeout(25000);
         // 读取超时 --服务器响应比较慢，增大时间
         https.setReadTimeout(25000);
         https.setRequestMethod(method);
+		if(method.equals(_POST)){
+			// 设置字符集
+			https.setRequestProperty("Charset", "UTF-8");
+			// 设置文件类型
+			https.setRequestProperty("Content-Type", "application/json");
+//            http.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) chrome/33.0.1750.146 Safari/537.36");
+			https.setDoOutput(true);
+		}
 		if (null != headers && !headers.isEmpty()) {
             for (Entry<String, String> entry : headers.entrySet()) {
             	https.setRequestProperty(entry.getKey(), entry.getValue());
             }
         }
-//        https.setDoOutput(true);
-        https.setDoInput(true);
-        https.connect();
         return https;
     }
+	/**
+	 * 不验证，即信任所有证书时使用
+	 * 有安全隐患，慎用！！！
+	 *
+	 * @return
+	 */
+	public static UnSafeHostnameVerifier getUnSafeHostnameVerifier() {
+		return new UnSafeHostnameVerifier();
+	}
+	/**
+	 * 获取服务端证书
+	 * <p>
+	 * 默认放在Assets目录下
+	 *
+	 * @param context
+	 * @return
+	 */
+	public static InputStream[] getCertificates(Context context, String... fileNames) {
+		if (context == null || fileNames == null || fileNames.length <= 0) {
+			return null;
+		}
+		try {
+			InputStream[] certificates = new InputStream[fileNames.length];
+			for (int i = 0; i < fileNames.length; i++) {
+				certificates[i] = context.getAssets().open(fileNames[i]);
+			}
+//			Log.e("certificates",certificates);
+			return certificates;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * 获取自定义SSLSocketFactory
+	 * <p>
+	 * 单项验证时只需要certificates，其余null即可
+	 * 双向验证时，3个参数均需要
+	 * <p>
+	 * 不验证，即信任所有证书时全部传null，同时配合getUnSafeHostnameVerifier()
+	 * 有安全隐患，慎用！！！
+	 *
+	 * @param certificates 服务端证书（.crt）
+	 * @param bksFile      客户端证书请求文件（.jsk -> .bks)
+	 * @param password     生成jks时的密钥库口令
+	 * @return
+	 */
+	public static SSLSocketFactory getSSLSocketFactory(InputStream[] certificates, InputStream bksFile, String password) {
+		try {
+			TrustManager[] trustManagers = prepareTrustManager(certificates);
+			KeyManager[] keyManagers = prepareKeyManager(bksFile, password);
+			SSLContext sslContext = SSLContext.getInstance("SSL");
+			if (trustManagers == null || trustManagers.length <= 0) {
+				trustManagers = new TrustManager[]{new UnSafeTrustManager()};
+			}
+			sslContext.init(keyManagers, trustManagers, new SecureRandom());
+			return sslContext.getSocketFactory();
+		} catch (NoSuchAlgorithmException | KeyManagementException e) {
+			throw new AssertionError(e);
+		}
+	}
+	private static TrustManager[] prepareTrustManager(InputStream... certificates) {
+		if (certificates == null || certificates.length <= 0) return null;
+		try {
+			CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			keyStore.load(null);
+			int index = 0;
+			for (InputStream is : certificates) {
+				String certificateAlias = Integer.toString(index++);
+				Certificate certificate = certificateFactory.generateCertificate(is);
+				keyStore.setCertificateEntry(certificateAlias, certificate);
+				try {
+					if (is != null)
+						is.close();
+				} catch (IOException ignored) {
+				}
+			}
+			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			trustManagerFactory.init(keyStore);
+			return trustManagerFactory.getTrustManagers();
+			// TODO: 2016/11/11 针对有效期异常导致校验失败的情况，目前没有完美的解决方案
+//            TrustManager[] keyStoreTrustManagers = trustManagerFactory.getTrustManagers();
+//            return getNotValidateTimeTrustManagers((X509TrustManager[]) keyStoreTrustManagers);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    /**
+	private static KeyManager[] prepareKeyManager(InputStream bksFile, String password) {
+		try {
+			if (bksFile == null || password == null) return null;
+			KeyStore clientKeyStore = KeyStore.getInstance("BKS");
+			clientKeyStore.load(bksFile, password.toCharArray());
+			KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			keyManagerFactory.init(clientKeyStore, password.toCharArray());
+			return keyManagerFactory.getKeyManagers();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	private static class UnSafeTrustManager implements X509TrustManager {
+		@Override
+		public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+		}
+
+		@Override
+		public X509Certificate[] getAcceptedIssuers() {
+			return new X509Certificate[]{};
+		}
+	}
+
+	private static class UnSafeHostnameVerifier implements HostnameVerifier {
+		@Override
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+		}
+	}
+	/**
      * get请求
      */
     public static void getRequst(final int requestCode,final String url, final Map<String, String> params,final DadanHandler handler) {
@@ -141,7 +283,7 @@ public class HttpUtil {
 							headers.put("Authorization","BasicAuth " + DadanPreference.getInstance(handler.getContext()).getTicket());
 						}
 			            if (isHttps(url)) {
-			                http = initHttps(initParams(url, params), _GET, headers);
+			                http = initHttps(initParams(url, params), _GET, headers,handler.getContext());
 			            } else {
 			                http = initHttp(initParams(url, params), _GET, headers);
 			            }
@@ -207,7 +349,7 @@ public class HttpUtil {
 					}
 					headers.put("Content-Type", "application/json");
 		            if (isHttps(url)) {
-		                http = initHttps(url, _POST, headers);
+		                http = initHttps(url, _POST, headers, handler.getContext());
 		            } else {
 		                http = initHttp(url, _POST, headers);
 		            }

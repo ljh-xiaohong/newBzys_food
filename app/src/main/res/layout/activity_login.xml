@@ -63,6 +63,7 @@
 	            android:text="登录账号"
 	            android:textColor="#333333"
 	            android:textSize="45px"/>
+			<!--android:text="13911111111"-->
 	        <EditText
 	            android:id="@+id/ed_phone"
 	            android:layout_width="match_parent"
@@ -70,7 +71,6 @@
 	            android:layout_toEndOf="@+id/tv_phone"
 	            android:background="@android:color/white"
 	            android:layout_marginStart="60px"
-                android:text="13911111111"
 	            android:layout_centerVertical="true"
 	            android:hint="请输入注册的手机号码或子账号"
 				android:inputType="number"
@@ -100,6 +100,7 @@
 	            android:text="登录密码"
 	            android:textColor="#333333"
 	            android:textSize="45px"/>
+			<!--android:text="123456"-->
 	        <EditText
 	            android:id="@+id/ed_pwd"
 	            android:layout_width="match_parent"
@@ -109,7 +110,6 @@
 	            android:layout_marginStart="60px"
 	            android:layout_centerVertical="true"
 	            android:hint="请输入登录密码"
-				android:text="123456"
 	            android:inputType="textPassword"
 	            android:textColorHint="#999999"
 	            android:textSize="45px"/>

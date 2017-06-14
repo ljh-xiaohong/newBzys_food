@@ -88,7 +88,7 @@ public class MainActivity extends BaseActivity  implements Function{
 		builder.notificationFlags = Notification.FLAG_AUTO_CANCEL;  //设置为点击后自动消失
 		builder.notificationDefaults = Notification.DEFAULT_SOUND;  //设置为铃声（ Notification.DEFAULT_SOUND）或者震动（ Notification.DEFAULT_VIBRATE）
 		JPushInterface.setPushNotificationBuilder(1, builder);
-//		Toast.makeText(MainActivity.this, "Basic Builder - 1", Toast.LENGTH_SHORT).show();
+//		Toast.makeText(ActivityConnectBuleTooth.this, "Basic Builder - 1", Toast.LENGTH_SHORT).show();
 	}
 
 
@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity  implements Function{
 		builder.statusBarDrawable = R.mipmap.ic_launcher;
 		builder.developerArg0 = "developerArg2";
 		JPushInterface.setPushNotificationBuilder(2, builder);
-//		Toast.makeText(MainActivity.this, "Custom Builder - 2", Toast.LENGTH_SHORT).show();
+//		Toast.makeText(ActivityConnectBuleTooth.this, "Custom Builder - 2", Toast.LENGTH_SHORT).show();
 	}
 	private void getId() {
 		JSONObject params=new JSONObject();
@@ -292,10 +292,10 @@ public class MainActivity extends BaseActivity  implements Function{
 					int code = result.optInt(Constants.CODE_KEY);
 					String message = result.getString(Constants.MESSAGE_KEY);
 					if(code==Constants.NETWORK_SUCCESS){
-//					Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+//					Intent intent = new Intent(ActivityConnectBuleTooth.this,LoginActivity.class);
 //					startActivity(intent);
-//					DadanPreference.getInstance(MainActivity.this).removeTicket();
-//					MainActivity.this.finish();
+//					DadanPreference.getInstance(ActivityConnectBuleTooth.this).removeTicket();
+//					ActivityConnectBuleTooth.this.finish();
 					}else{
 						 CustomToast.showToast(MainActivity.this, message);
 					}
@@ -321,6 +321,7 @@ public class MainActivity extends BaseActivity  implements Function{
 	@Override
 	public void onFaile(int requestCode, int status, String msg) {
 //		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
+
 	}
 }
 

@@ -20,12 +20,22 @@
                 android:text="绑定失败"
                 android:layout_height="wrap_content" />
         </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoRelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_below="@id/lay_tips"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content">
         <ImageView
             android:layout_width="679px"
-            android:src="@mipmap/code"
+            android:src="@mipmap/qrcode"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/lay_tips"
             android:layout_marginBottom="87px"
             android:layout_marginTop="77px"
             android:layout_height="679px" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/no"/>
+        </com.zhy.autolayout.AutoRelativeLayout>
     </com.zhy.autolayout.AutoRelativeLayout>

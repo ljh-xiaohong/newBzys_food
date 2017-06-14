@@ -22,6 +22,7 @@ import com.bapm.bzys.newBzys_food.network.function.interf.FunctionManager;
 import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.DadanArcDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.CallDialog;
 import com.zhy.autolayout.AutoLinearLayout;
@@ -58,6 +59,7 @@ public class ActivityBookInformation extends BaseActivity implements Function, V
     ImageButton imgBtnCall;
     private FunctionManager manager;
     private DadanArcDialog loadDialog;
+    private LoginFailUtils failUtils;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,6 +115,7 @@ public class ActivityBookInformation extends BaseActivity implements Function, V
             case DadanUrl.USER_LOGIN_AGAIN_REQUEST_CODE:
                 if (result.optString("LogionCode").equals("1")) {
                     DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
+                    failUtils.getId();
                 } else if (result.optString("LogionCode").equals("-1")) {
                     Intent intent = new Intent(this, LoginActivity.class);
                     intent.putExtra("LogionCode", "-1");
@@ -139,12 +142,8 @@ public class ActivityBookInformation extends BaseActivity implements Function, V
     @Override
     public void onFaile(int requestCode, int status, String msg) {
         loadDialog.dismiss();
-//         CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-        if (requestCode == HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE || requestCode == 233) {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-            manager.loginAgain(params, this);
-        }
+        failUtils=new LoginFailUtils(requestCode,ActivityBookInformation.this ,manager,ActivityBookInformation.this);
+        failUtils.onFaile();
     }
 
     @Override

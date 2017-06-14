@@ -24,6 +24,7 @@ import com.bapm.bzys.newBzys_food.util.CommonUtil;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -62,11 +63,13 @@ public class ActivityAdvertAdd extends BaseActivity implements Function,OnClickL
 	private String eDstatus;
 	private List<String> statusIds;
 	private String tvStatusId;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_advert_add);
-		setTheme(R.style.ActionSheetStyleIOS7);
+//		setTheme(R.style.ActionSheetStyleIOS7);
 		manager = this.init(this.getContext());
 		manager.registFunClass(ActivityAdvertAdd.class);
 		initView();
@@ -144,6 +147,7 @@ public class ActivityAdvertAdd extends BaseActivity implements Function,OnClickL
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -152,7 +156,7 @@ public class ActivityAdvertAdd extends BaseActivity implements Function,OnClickL
 				}
 				break;
 		case DadanUrl.ADVER_ADD_OR_UPDATE_URL_CODE:{
-			btn_sure.setEnabled(true);
+//			btn_sure.setEnabled(true);
 			handleGoodsTypeAdd(result);
 			break;
 
@@ -164,14 +168,11 @@ public class ActivityAdvertAdd extends BaseActivity implements Function,OnClickL
 
 	@Override
 	public void onFaile(int requestCode, int status, String msg) {
-		loadDialog.dismiss();
 		Log.i(LoginActivity.class.toString(),msg);
 //		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode==HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityAdvertAdd.this ,manager,ActivityAdvertAdd.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {
@@ -246,6 +247,7 @@ public class ActivityAdvertAdd extends BaseActivity implements Function,OnClickL
 					CustomToast.showToast(ActivityAdvertAdd.this,"名称不能为空");
 				} else{
 					loadDialog.show();
+					btn_sure.setEnabled(true);
 					params.put("PromotionName", ed_name.getText().toString());
 					params.put("PromotionNo", ed_no.getText().toString());
 					params.put("PromotionStatus", tv_status_id.getText().toString());

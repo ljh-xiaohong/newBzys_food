@@ -19,6 +19,7 @@ import com.bapm.bzys.newBzys_food.util.CommonUtil;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,8 @@ public class ActivityAccountChildAdd extends BaseActivity implements Function,On
 	private Button btn_sure;
 	private AccountChild child;
 	private String prephone;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -85,6 +88,7 @@ public class ActivityAccountChildAdd extends BaseActivity implements Function,On
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -93,7 +97,6 @@ public class ActivityAccountChildAdd extends BaseActivity implements Function,On
 				}
 				break;
 		case DadanUrl.USER_CHILD_ADD_URL_CODE:{
-			btn_sure.setEnabled(true);
 			handleChildAdd(result);
 			break;
 		}
@@ -116,12 +119,9 @@ public class ActivityAccountChildAdd extends BaseActivity implements Function,On
 	public void onFaile(int requestCode, int status, String msg) {
 		Log.i(LoginActivity.class.toString(),msg);
 //		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode==HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
 		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityAccountChildAdd.this ,manager,ActivityAccountChildAdd.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {
@@ -145,6 +145,7 @@ public class ActivityAccountChildAdd extends BaseActivity implements Function,On
 					CustomToast.showToast(ActivityAccountChildAdd.this,"密码不能为空");
 				}else{
 					loadDialog.show();
+					btn_sure.setEnabled(true);
 					params.put("Name", ed_name.getText().toString());
 					params.put("SubUser1",ed_account.getText().toString());
 					params.put("SubPassword", ed_pwd.getText().toString());

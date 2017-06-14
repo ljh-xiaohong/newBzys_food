@@ -7,7 +7,7 @@ import java.util.Comparator;
  * Created by fs-ljh on 2017/6/5.
  */
 
-public class sort implements Comparator<FoodSale.WeekDayBean.GoodsSalesBean>,Serializable {
+public class sort implements Comparator<FoodSale.GoodsSalesBean>,Serializable {
 
     private final String str;
 
@@ -15,7 +15,7 @@ public class sort implements Comparator<FoodSale.WeekDayBean.GoodsSalesBean>,Ser
         this.str=str;
     }
     @Override
-    public int compare(FoodSale.WeekDayBean.GoodsSalesBean lhs, FoodSale.WeekDayBean.GoodsSalesBean rhs) {
+    public int compare(FoodSale.GoodsSalesBean lhs, FoodSale.GoodsSalesBean rhs) {
              // TODO Auto-generated method stub
         if (str.equals("desc")) {
             return rhs.getSaleCount() - lhs.getSaleCount();

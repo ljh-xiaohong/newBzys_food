@@ -14,25 +14,21 @@ import com.bapm.bzys.newBzys_food.adapter.AccountChildAdapter;
 import com.bapm.bzys.newBzys_food.base.BaseActivity;
 import com.bapm.bzys.newBzys_food.model.AccountChild;
 import com.bapm.bzys.newBzys_food.network.DadanUrl;
-import com.bapm.bzys.newBzys_food.network.HttpUtil;
 import com.bapm.bzys.newBzys_food.network.function.interf.Function;
 import com.bapm.bzys.newBzys_food.network.function.interf.FunctionManager;
 import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
-import com.bapm.bzys.newBzys_food.widget.SimpleHeader;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView.OnItemClickListener;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialogListener;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -46,6 +42,8 @@ public class ActivityAccountChild extends BaseActivity implements Function,OnCli
 	private AccountChildAdapter adapter;
 	private List<AccountChild> childs;
 	private LinearLayout   layout_menu_home;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -152,6 +150,7 @@ public class ActivityAccountChild extends BaseActivity implements Function,OnCli
 			if (result.optString("LogionCode").equals("1")) {
 				DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 				initData();
+				failUtils.getId();
 			}else if(result.optString("LogionCode").equals("-1")){
 				Intent intent=new Intent(this,LoginActivity.class);
 				intent.putExtra("LogionCode","-1");
@@ -179,13 +178,9 @@ public class ActivityAccountChild extends BaseActivity implements Function,OnCli
 	public void onFaile(int requestCode, int status, String msg) {
 		listView.setRefreshFail("加载失败");
 		listView.stopLoadMore();
-		Log.i(LoginActivity.class.toString(),msg);
-//		Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode== HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityAccountChild.this ,manager,ActivityAccountChild.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {

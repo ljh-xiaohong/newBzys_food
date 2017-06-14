@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
@@ -26,8 +27,12 @@ import com.bapm.bzys.newBzys_food.model.Advert;
 import com.bapm.bzys.newBzys_food.util.GlideUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
 import com.bapm.bzys.newBzys_food.zxing.activity.CaptureActivity;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 
 import java.util.List;
+
+import okhttp3.Call;
 
 public class AdvertAdapter extends BaseAdapter {
 
@@ -95,7 +100,21 @@ public class AdvertAdapter extends BaseAdapter {
 		if (list.get(position).getUrl()==null||list.get(position).getUrl().equals("")) {
 			GlideUtils.displayNative(holder.iv_qrcode, R.mipmap.qrcode_default);
 		} else {
-			GlideUtils.display(holder.iv_qrcode,list.get(position).getUrl());
+			OkHttpUtils
+					.get()//
+					.url(list.get(position).getUrl())//
+					.build()//
+					.execute(new BitmapCallback()
+					{
+						@Override
+						public void onError(Call call, Exception e, int id) {
+							GlideUtils.displayNative(holder.iv_qrcode, R.mipmap.img_fairl);
+						}
+						@Override
+						public void onResponse(Bitmap response, int id) {
+							holder.iv_qrcode.setImageBitmap(response);
+						}
+					});
 		}
 		if(list.get(position).getStatus().contains("暂停")){
 			holder.arrow.setEnabled(false);

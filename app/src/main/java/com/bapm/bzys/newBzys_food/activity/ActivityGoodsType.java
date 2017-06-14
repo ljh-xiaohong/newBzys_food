@@ -15,25 +15,22 @@ import com.bapm.bzys.newBzys_food.base.BaseActivity;
 import com.bapm.bzys.newBzys_food.model.AccountChild;
 import com.bapm.bzys.newBzys_food.model.GoodsType;
 import com.bapm.bzys.newBzys_food.network.DadanUrl;
-import com.bapm.bzys.newBzys_food.network.HttpUtil;
 import com.bapm.bzys.newBzys_food.network.function.interf.Function;
 import com.bapm.bzys.newBzys_food.network.function.interf.FunctionManager;
 import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
-import com.bapm.bzys.newBzys_food.widget.SimpleHeader;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialogListener;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -48,6 +45,8 @@ public class ActivityGoodsType extends BaseActivity implements Function,OnClickL
 	private GoodsTypeAdapter adapter;
 	private List<GoodsType> list;
 	private LinearLayout   layout_menu_home;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -182,6 +181,7 @@ public class ActivityGoodsType extends BaseActivity implements Function,OnClickL
 			if (result.optString("LogionCode").equals("1")) {
 				DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 				initData();
+				failUtils.getId();
 			}else if(result.optString("LogionCode").equals("-1")){
 				Intent intent=new Intent(this,LoginActivity.class);
 				intent.putExtra("LogionCode","-1");
@@ -189,6 +189,12 @@ public class ActivityGoodsType extends BaseActivity implements Function,OnClickL
 				ActivityManager.getInstance().finishAllActivity();
 			}
 			break;
+			case DadanUrl.GET_REGISTRATION_CODE:
+				try {
+					Log.e("GET_REGISTRATION_CODE",result.getString("Message"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 		default:
 			break;
 		}
@@ -200,13 +206,8 @@ public class ActivityGoodsType extends BaseActivity implements Function,OnClickL
 		listView.setRefreshFail("加载失败");
 		listView.stopLoadMore();
 		loadDialog.dismiss();
-		Log.i(LoginActivity.class.toString(),msg);
-//		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode== HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-				Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-				manager.loginAgain(params, this);
-		}
+		failUtils=new LoginFailUtils(requestCode,ActivityGoodsType.this ,manager,ActivityGoodsType.this);
+		failUtils.onFaile();
 	}
 	@Override
 	public void onSuccess(int requstCode, JSONArray result) {

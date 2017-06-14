@@ -19,6 +19,7 @@ import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CountDownTimerUtils;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,8 @@ public class ActivityForgetPwd extends BaseActivity implements Function{
 	private FunctionManager manager;
 	private EditText ed_phone;
 	private EditText ed_code;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,6 +84,7 @@ public class ActivityForgetPwd extends BaseActivity implements Function{
 			case DadanUrl.USER_LOGIN_AGAIN_REQUEST_CODE:
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -132,11 +136,9 @@ public class ActivityForgetPwd extends BaseActivity implements Function{
 		loadDialog.dismiss();
 		Log.i(ActivityForgetPwd.class.toString(),msg);
 //		 CustomToast.showToast(this,msg,Toast.LENGTH_LONG).show();
-		if(requestCode== HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityForgetPwd.this ,manager,ActivityForgetPwd.this);
+		failUtils.onFaile();
 	}
 	@Override
 	protected void onDestroy() {

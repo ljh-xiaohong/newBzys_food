@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="280px"
+    android:layout_height="wrap_content"
     android:background="@color/white">
+
     <com.zhy.autolayout.AutoRelativeLayout
         android:layout_width="match_parent"
         android:id="@+id/order_layout"
         android:background="@color/white"
-        android:layout_height="280px">
+        android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/img_order_list"
-        android:layout_margin="20px"
+        android:layout_margin="30px"
         android:layout_width="240px"
         android:src="@mipmap/ic_launcher"
         android:scaleType="fitXY"
@@ -27,7 +28,7 @@
             android:id="@+id/tv_order_list_name"
             android:text="中国画"
             android:textColor="@color/black3"
-            android:layout_marginTop="20px"
+            android:layout_marginTop="30px"
             android:textSize="39px"
             android:layout_toRightOf="@id/img_order_list"
             android:layout_width="wrap_content"
@@ -42,7 +43,7 @@
         android:layout_width="28px"
         android:layout_height="15px"
         android:layout_marginRight="40px"
-        android:layout_marginTop="20px"
+        android:layout_marginTop="30px"
         android:focusable="false"
         android:src="@mipmap/pull_down"
         />
@@ -74,7 +75,7 @@
             android:layout_toRightOf="@+id/img_order_list"
             android:layout_below="@id/tv_order_list_name"
             android:textSize="30px"
-            android:layout_marginTop="38px"
+            android:layout_marginTop="35px"
             android:textColor="@color/black3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -90,10 +91,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 <com.zhy.autolayout.AutoLinearLayout
+    android:id="@+id/lay_no_and_count"
     android:layout_width="wrap_content"
     android:layout_toRightOf="@+id/img_order_list"
     android:layout_below="@id/tv_order_list_id"
-    android:layout_marginTop="25px"
+    android:layout_marginTop="16px"
     android:layout_height="wrap_content">
     <TextView
         android:layout_width="wrap_content"
@@ -113,11 +115,13 @@
 
     <TextView
         android:id="@+id/tv_order_list_remark"
-        android:textColor="@color/black6"
-        android:textSize="27px"
+        android:textColor="#6b3416"
+        android:textSize="39px"
         android:layout_marginBottom="20px"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="25px"
+        android:lineSpacingExtra="10px"
         android:layout_width="wrap_content"
+        android:layout_below="@id/lay_no_and_count"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/img_order_list"
          />

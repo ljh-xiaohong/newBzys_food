@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="true"
+    android:background="#ff9c00">
+
+    <com.zhy.autolayout.AutoRelativeLayout
+        android:id="@+id/layout_title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="180px"
+        android:background="#ff9c00">
+    <ImageButton
+        android:layout_width="69px"
+        android:layout_height="fill_parent"
+        android:layout_centerVertical="true"
+        android:onClick="back"
+        android:paddingLeft="30px"
+        android:src="@mipmap/btn_back"
+        android:background="@null"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="蓝牙"
+        android:textColor="@android:color/white"
+        android:textSize="51px"
+        android:layout_centerInParent="true"/>
+    </com.zhy.autolayout.AutoRelativeLayout>
+<com.zhy.autolayout.AutoRelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="已配对的设备"
+            android:layout_height="wrap_content" />
+            <com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView
+                android:id="@+id/connceted_recycler"
+                android:layout_width="match_parent"
+                android:layout_marginStart="20px"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            </com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView>
+        </com.zhy.autolayout.AutoLinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="可用蓝牙的设备"
+                android:layout_height="wrap_content" />
+        <com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView
+            android:id="@+id/wait_conncet_recycler"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20px"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        </com.bapm.bzys.newBzys_food.view.nestlistview.NestFullListView>
+    </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/lay_search"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/img_search"
+            android:layout_width="wrap_content"
+            android:src="@mipmap/icon"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="打印机设置"
+            android:layout_height="wrap_content" />
+    </com.zhy.autolayout.AutoLinearLayout>
+</com.zhy.autolayout.AutoRelativeLayout>
+</com.zhy.autolayout.AutoLinearLayout>

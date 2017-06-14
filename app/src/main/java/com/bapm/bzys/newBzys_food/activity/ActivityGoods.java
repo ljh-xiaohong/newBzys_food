@@ -21,6 +21,7 @@ import com.bapm.bzys.newBzys_food.util.ActivityManager;
 import com.bapm.bzys.newBzys_food.util.Constants;
 import com.bapm.bzys.newBzys_food.util.CustomToast;
 import com.bapm.bzys.newBzys_food.util.DadanPreference;
+import com.bapm.bzys.newBzys_food.util.LoginFailUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialog;
 import com.bapm.bzys.newBzys_food.widget.dialog.MyDialogListener;
@@ -54,6 +55,8 @@ public class ActivityGoods extends BaseActivity implements Function,OnClickListe
 	private GoodsAdapter adapter;
 
 	private Button btn_add;
+	private LoginFailUtils failUtils;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -308,6 +311,7 @@ public class ActivityGoods extends BaseActivity implements Function,OnClickListe
 				if (result.optString("LogionCode").equals("1")) {
 					DadanPreference.getInstance(this).setTicket(result.optString("Ticket"));
 					initData();
+					failUtils.getId();
 				}else if(result.optString("LogionCode").equals("-1")){
 					Intent intent=new Intent(this,LoginActivity.class);
 					intent.putExtra("LogionCode","-1");
@@ -425,11 +429,9 @@ public class ActivityGoods extends BaseActivity implements Function,OnClickListe
 	@Override
 	public void onFaile(int requestCode, int status, String msg) {
 //		 CustomToast.showToast(this, msg);
-		if(requestCode==HttpUtil.ST_ACCOUNT_OTHER_LOGIN_FAILE||requestCode==233){
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("DEVICE_ID", ((TelephonyManager) getSystemService(TELEPHONY_SERVICE)).getDeviceId());
-			manager.loginAgain(params, this);
-		}
+		loadDialog.dismiss();
+		failUtils=new LoginFailUtils(requestCode,ActivityGoods.this ,manager,ActivityGoods.this);
+		failUtils.onFaile();
 	}
 	public void back(View v){
 		this.finish();

@@ -2,6 +2,9 @@ package com.bapm.bzys.newBzys_food.adapter;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +19,13 @@ import com.bapm.bzys.newBzys_food.R;
 import com.bapm.bzys.newBzys_food.model.Goods;
 import com.bapm.bzys.newBzys_food.util.GlideUtils;
 import com.bapm.bzys.newBzys_food.widget.ZrcListView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 
 import java.text.NumberFormat;
 import java.util.List;
+
+import okhttp3.Call;
 
 
 public class GoodsAdapter extends BaseAdapter {
@@ -106,18 +113,24 @@ public class GoodsAdapter extends BaseAdapter {
 					view.tv_unit.setText("/"+goods.getUnit());
 				else
 					view.tv_unit.setText("");
-//				AsyncImageLoader.getInstance(context).downloadImage(goods.getUrl(), view.goods_icon, true, new AsyncImageLoader.ImageCallback() {
-//					@Override
-//					public void onImageLoaded(ImageView imageView, Bitmap bitmap, String imageUrl) {
-//						if(bitmap!=null){
-//							imageView.setImageBitmap(bitmap);
-//						}
-//					}
-//				});
 				if (goods.getUrl()==null||goods.getUrl().equals("")) {
 					GlideUtils.displayNative(view.goods_icon, R.mipmap.qrcode_default);
 				} else {
-					GlideUtils.display(view.goods_icon,goods.getUrl());
+					OkHttpUtils
+							.get()//
+							.url(goods.getUrl())//
+							.build()//
+							.execute(new BitmapCallback()
+							{
+								@Override
+								public void onError(Call call, Exception e, int id) {
+									GlideUtils.displayNative(view.goods_icon, R.mipmap.img_fairl);
+								}
+								@Override
+								public void onResponse(Bitmap response, int id) {
+									view.goods_icon.setImageBitmap(response);
+								}
+							});
 				}
 			}
 	        return convertView;

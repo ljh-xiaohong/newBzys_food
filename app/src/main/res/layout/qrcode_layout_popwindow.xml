@@ -43,33 +43,34 @@
         <com.zhy.autolayout.AutoLinearLayout
             android:id="@+id/desk_lay"
             android:layout_below="@id/tv_phone"
-            android:layout_width="wrap_content"
+            android:layout_width="780px"
             android:layout_marginTop="70px"
             android:layout_centerHorizontal="true"
             android:orientation="horizontal"
+            android:gravity="center_horizontal"
             android:layout_height="wrap_content">
             <TextView
                 android:id="@+id/tv_desk_name"
-                android:layout_width="wrap_content"
+                android:layout_width="780px"
                 android:textSize="48px"
                 android:textColor="@color/edt_hint_orange"
-                android:text="asdada"
-                android:layout_marginEnd="40px"
+                android:gravity="center_horizontal"
+                android:text="二十个字了没有二十个字了没有二十      12345678901"
                 android:layout_height="wrap_content" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:textSize="48px"
-                android:textColor="@color/edt_hint_orange"
-                android:text="|"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:id="@+id/tv_desk_no"
-                android:layout_width="wrap_content"
-                android:layout_marginStart="40px"
-                android:textSize="48px"
-                android:textColor="@color/edt_hint_orange"
-                android:text="asdaaf"
-                android:layout_height="wrap_content" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:textSize="48px"-->
+                <!--android:textColor="@color/edt_hint_orange"-->
+                <!--android:text="|"-->
+                <!--android:layout_height="wrap_content" />-->
+            <!--<TextView-->
+                <!--android:id="@+id/tv_desk_no"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_marginStart="40px"-->
+                <!--android:textSize="48px"-->
+                <!--android:textColor="@color/edt_hint_orange"-->
+                <!--android:text="asdaaf"-->
+                <!--android:layout_height="wrap_content" />-->
         </com.zhy.autolayout.AutoLinearLayout>
         <ImageView
             android:id="@+id/img_desk"

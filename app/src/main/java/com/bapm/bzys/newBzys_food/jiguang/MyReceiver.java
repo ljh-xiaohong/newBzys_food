@@ -60,7 +60,7 @@ public class MyReceiver extends BroadcastReceiver {
 
 	}
 
-	//send msg to MainActivity
+	//send msg to ActivityConnectBuleTooth
 	private void processCustomMessage(Context context, Bundle bundle) {
 		if (MainActivity.isForeground) {
 			String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
